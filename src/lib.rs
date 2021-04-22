@@ -5,7 +5,7 @@
 //!
 //! ## Crate Features
 //! - `std`: Enables dependence on `std` to allow for more features
-//! - `serde`: Enabls serializing/deserializing the `UnorderedNTuple` struct in serde
+//! - `serde`: Enables serializing/deserializing the `UnorderedNTuple` struct in serde
 //!
 //! By default, both features are enabled.
 
