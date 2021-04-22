@@ -15,14 +15,15 @@ macro_rules! if_feature {
     )*)
 }
 
-if_feature!("std",
-    extern crate std;
-    use std::hash::{Hash, Hasher};
-);
+if_feature!("std", extern crate std; use std::hash::{Hash, Hasher};);
 
-if_feature!("serde",
+if_feature!(
+    "serde",
     use std::{convert::TryInto, marker::PhantomData, fmt, vec::Vec};
-    use serde::{de::{Deserialize, Deserializer, Error, SeqAccess, Visitor}, ser::{Serialize, Serializer, SerializeSeq}};
+    use serde::{
+        de::{Deserialize, Deserializer, Error, SeqAccess, Visitor},
+        ser::{Serialize, Serializer, SerializeSeq},
+    };
 );
 
 /// An `UnorderedPair` is a special subtype of `UnorderedNTuple` for only 2 elements. This has been
@@ -57,7 +58,8 @@ impl<T> From<UnorderedPair<T>> for (T, T) {
 pub struct UnorderedNTuple<T, const N: usize>(pub [T; N]);
 
 impl<T, const N: usize> From<[T; N]> for UnorderedNTuple<T, N> {
-    fn from(arg: [T; N]) -> Self { Self(arg)
+    fn from(arg: [T; N]) -> Self {
+        Self(arg)
     }
 }
 
@@ -93,7 +95,8 @@ where
     }
 }
 
-if_feature!("std",
+if_feature!(
+    "std",
     impl<T, const N: usize> Hash for UnorderedNTuple<T, N>
     where
         T: Hash + Ord + Clone,
@@ -106,9 +109,13 @@ if_feature!("std",
     }
 );
 
-if_feature!("serde",
+if_feature!(
+    "serde",
     impl<T: Serialize, const N: usize> Serialize for UnorderedNTuple<T, N> {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
             let mut seq = serializer.serialize_seq(Some(N))?;
             for item in self.0.iter() {
                 seq.serialize_element(item)?;
@@ -116,23 +123,30 @@ if_feature!("serde",
             seq.end()
         }
     }
-
     struct UnorderedNTupleVisitor<T, const N: usize> {
         _phantom: PhantomData<fn() -> [T; N]>,
     }
     impl<T, const N: usize> UnorderedNTupleVisitor<T, N> {
         fn new() -> Self {
-            Self { _phantom: PhantomData }
+            Self {
+                _phantom: PhantomData,
+            }
         }
     }
-    impl<'de, T, const N: usize> Visitor<'de> for UnorderedNTupleVisitor<T, N> where T: Deserialize<'de> {
+    impl<'de, T, const N: usize> Visitor<'de> for UnorderedNTupleVisitor<T, N>
+    where
+        T: Deserialize<'de>,
+    {
         type Value = UnorderedNTuple<T, N>;
 
         fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
             f.write_str("Expecting a sequence with N homogenous elements of type T")
         }
 
-        fn visit_seq<S>(self, mut access: S) -> Result<Self::Value, S::Error> where S: SeqAccess<'de> {
+        fn visit_seq<S>(self, mut access: S) -> Result<Self::Value, S::Error>
+        where
+            S: SeqAccess<'de>,
+        {
             if access.size_hint() != Some(N) {
                 return Err(S::Error::custom("Wrong number of elements"));
             }
@@ -140,12 +154,15 @@ if_feature!("serde",
             for _ in 0..N {
                 data.push(access.next_element()?.unwrap())
             }
-            Ok(UnorderedNTuple(data.try_into().unwrap_or_else(|_| unreachable!())))
+            Ok(UnorderedNTuple(
+                data.try_into().unwrap_or_else(|_| unreachable!()),
+            ))
         }
     }
     impl<'de, T: Deserialize<'de>, const N: usize> Deserialize<'de> for UnorderedNTuple<T, N> {
         fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-            where D: Deserializer<'de>
+        where
+            D: Deserializer<'de>,
         {
             deserializer.deserialize_seq(UnorderedNTupleVisitor::<T, N>::new())
         }
