@@ -168,3 +168,54 @@ if_feature!(
         }
     }
 );
+
+#[cfg(test)]
+mod tests {
+    use quickcheck_macros::quickcheck;
+    use quickcheck::TestResult;
+
+    use super::*;
+
+    /// Check that two pairs are equal, regardless of element order
+    #[quickcheck]
+    fn check_pair_equality(a: usize, b: usize) -> bool {
+        UnorderedNTuple([a, b]) == UnorderedNTuple([b, a]) && UnorderedNTuple([a, b]) == UnorderedNTuple([a, b])
+    }
+
+    /// Check that two singleton sets compare the same as their members
+    #[quickcheck]
+    fn check_singleton_equality(a: usize, b: usize) -> bool {
+        (a == b) == (UnorderedNTuple([a]) == UnorderedNTuple([b]))
+    }
+
+    /// Check that pairs with non-equal elements actually compare non-equal
+    #[quickcheck]
+    fn check_pair_inequality(a: usize, b: usize, c: usize) -> TestResult {
+        if b == c {
+            TestResult::discard()
+        } else {
+            TestResult::from_bool(UnorderedNTuple([a, b]) != UnorderedNTuple([a, c]))
+        }
+    }
+
+    /// Check that triples with equal elements compare equal, regardless of order
+    #[quickcheck]
+    fn check_triple_equality(a: usize, b: usize, c: usize) -> bool {
+        let triples = [
+            UnorderedNTuple([a, b, c]),
+            UnorderedNTuple([b, a, c]),
+            UnorderedNTuple([b, c, a]),
+            UnorderedNTuple([a, c, b]),
+            UnorderedNTuple([c, a, b]),
+            UnorderedNTuple([c, b, a]),
+        ];
+        for triple_a in triples.iter() {
+            for triple_b in triples.iter() {
+                if triple_a != triple_b {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+}
