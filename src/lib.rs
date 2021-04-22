@@ -33,6 +33,11 @@ if_feature!(
 ///
 /// It can also be converted to or from a tuple (similar impls for larger types will come once
 /// generics become stronger).
+///
+/// ```
+/// # use unordered_n_tuple::UnorderedPair;
+/// assert_eq!(UnorderedPair::from(("a", "b")), UnorderedPair::from(("b", "a")))
+/// ```
 pub type UnorderedPair<T> = UnorderedNTuple<T, 2>;
 
 impl<T> From<(T, T)> for UnorderedPair<T> {
@@ -223,6 +228,46 @@ mod tests {
             }
         }
         true
+    }
+
+    fn get_hash<H: Hash>(h: H) -> u64 {
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        h.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    impl<T, const N: usize> quickcheck::Arbitrary for UnorderedNTuple<T, N>
+    where
+        T: quickcheck::Arbitrary,
+    {
+        fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+            let options: Vec<T> = (0..g.size()).map(|_| T::arbitrary(g)).collect();
+            let items: [T; N] = (0..N)
+                .map(|_| g.choose(&options).unwrap().clone())
+                .collect::<Vec<T>>()
+                .try_into()
+                .unwrap_or_else(|_| unreachable!());
+            UnorderedNTuple::from(items)
+        }
+    }
+    #[quickcheck]
+    fn check_pair_hashing(pa: UnorderedPair<usize>, pb: UnorderedPair<usize>) -> TestResult {
+        if pa == pb {
+            TestResult::from_bool(get_hash(pa) == get_hash(pb))
+        } else {
+            TestResult::discard()
+        }
+    }
+    #[quickcheck]
+    fn check_triple_hashing(
+        pa: UnorderedNTuple<usize, 3>,
+        pb: UnorderedNTuple<usize, 3>,
+    ) -> TestResult {
+        if pa == pb {
+            TestResult::from_bool(get_hash(pa) == get_hash(pb))
+        } else {
+            TestResult::discard()
+        }
     }
 
     fn check_serde_pair(pair: UnorderedPair<u32>) {
