@@ -177,6 +177,7 @@ if_feature!(
 mod tests {
     use quickcheck::TestResult;
     use quickcheck_macros::quickcheck;
+    use serde_test::{assert_tokens, Token};
 
     use super::*;
 
@@ -222,5 +223,38 @@ mod tests {
             }
         }
         true
+    }
+
+    fn check_serde_pair(pair: UnorderedPair<u32>) {
+        assert_tokens(
+            &pair,
+            &[
+                Token::Seq { len: Some(2) },
+                Token::U32(pair.0[0]),
+                Token::U32(pair.0[1]),
+                Token::SeqEnd,
+            ],
+        );
+    }
+
+    fn check_serde_triple(triple: UnorderedNTuple<u32, 3>) {
+        assert_tokens(
+            &triple,
+            &[
+                Token::Seq { len: Some(3) },
+                Token::U32(triple.0[0]),
+                Token::U32(triple.0[1]),
+                Token::U32(triple.0[2]),
+                Token::SeqEnd,
+            ],
+        );
+    }
+
+    #[test]
+    fn test_serde() {
+        check_serde_pair(UnorderedPair::from([0, 1]));
+        check_serde_pair(UnorderedPair::from([0, 1]));
+        check_serde_triple(UnorderedNTuple::from([0, 1, 2]));
+        check_serde_triple(UnorderedNTuple::from([0, 4, 0]));
     }
 }
