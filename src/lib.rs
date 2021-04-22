@@ -15,8 +15,10 @@ macro_rules! if_feature {
     )*)
 }
 
+#[rustfmt::skip]
 if_feature!("std", extern crate std; use std::hash::{Hash, Hasher};);
 
+#[rustfmt::skip]
 if_feature!(
     "serde",
     use std::{convert::TryInto, marker::PhantomData, fmt, vec::Vec};
@@ -95,6 +97,7 @@ where
     }
 }
 
+#[rustfmt::skip]
 if_feature!(
     "std",
     impl<T, const N: usize> Hash for UnorderedNTuple<T, N>
@@ -109,6 +112,7 @@ if_feature!(
     }
 );
 
+#[rustfmt::skip]
 if_feature!(
     "serde",
     impl<T: Serialize, const N: usize> Serialize for UnorderedNTuple<T, N> {
@@ -171,15 +175,16 @@ if_feature!(
 
 #[cfg(test)]
 mod tests {
-    use quickcheck_macros::quickcheck;
     use quickcheck::TestResult;
+    use quickcheck_macros::quickcheck;
 
     use super::*;
 
     /// Check that two pairs are equal, regardless of element order
     #[quickcheck]
     fn check_pair_equality(a: usize, b: usize) -> bool {
-        UnorderedNTuple([a, b]) == UnorderedNTuple([b, a]) && UnorderedNTuple([a, b]) == UnorderedNTuple([a, b])
+        UnorderedNTuple([a, b]) == UnorderedNTuple([b, a])
+            && UnorderedNTuple([a, b]) == UnorderedNTuple([a, b])
     }
 
     /// Check that two singleton sets compare the same as their members
