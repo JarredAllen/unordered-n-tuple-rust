@@ -1,6 +1,6 @@
 [package]
 name = "unordered-n-tuple"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2018"
 authors = ["Jarred Allen <jarredallen73@gmail.com>"]
 description = "An unordered tuple of n homogenous elements"
