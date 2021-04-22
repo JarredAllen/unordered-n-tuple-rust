@@ -5,6 +5,7 @@ Unordered N Tuple
 [![Documentation](https://docs.rs/unordered-n-tuple/badge.svg)](https://docs.rs/unordered-n-tuple)
 ![Build Status](https://api.travis-ci.com/JarredAllen/unordered-n-tuple-rust.svg)
 ![License: MIT OR Apache-2.0](https://img.shields.io/crates/l/unordered-n-tuple.svg)
+[![Dependency Status](https://deps.rs/repo/github/JarredAllen/unordered-n-tuple-rust/status.svg)](https://deps.rs/repo/github/JarredAllen/unordered-n-tuple-rust/)
 
 This crate provides an implementation of an unordered n-tuple of homogenous
 items. See [the documentation](https://docs.rs/unordered-n-tuple) for more info.
